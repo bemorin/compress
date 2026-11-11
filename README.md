@@ -11,7 +11,8 @@ Live at `https://compress.bemorin.com` (once deployed). Code under the MIT Licen
 - **Formats out:** WebP, AVIF, JPEG (MozJPEG), PNG (lossless, Oxipng), or "Same" to keep each file's own format. GIF, BMP and HEIC become WebP.
 - **One quality slider** for every format, with a plain hint of what the number means. PNG ignores it.
 - **Longest side:** keep the size, or fit inside 3840, 2560, 1920, 1280 or 800 pixels (never enlarged). Resizing uses a Lanczos filter in linear light.
-- **Before and after:** drag the line, click anywhere, or use the arrow keys. The magnifier shows pixels at three times their size where you point.
+- **Before and after:** drag the line, click anywhere, or use the arrow keys. The magnifier (or a double click) shows pixels at three times their size; click and drag to move around.
+- **Light or dark:** follows the system until you choose with the switch in the top bar; the choice is remembered in that browser.
 - **Never worse:** when compressing again in the same format, at the same size, gives a bigger file, the original is kept.
 - **Location and camera data are dropped**, since every file is re-encoded from its pixels (except a file whose original is kept, see the next point but one). Photos are turned upright first, following their EXIF orientation.
 - **Transparency:** kept in WebP, AVIF and PNG. JPEG has none, so transparent parts become white, and the app says so.

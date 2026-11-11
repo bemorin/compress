@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Logo } from "../../components/logo";
 import { SITE } from "../../lib/site.ts";
 
 export const metadata: Metadata = { title: `Licenses · ${SITE.title}` };
@@ -24,9 +25,8 @@ export default function Licenses() {
       <div className="workspace licenses">
         <header className="topbar">
           <a className="brand" href="/">
-            <span className="brand-name">{SITE.homeLabel}<span className="brand-period">.</span></span>
-            <span className="brand-divider" />
-            <span className="brand-description">{SITE.short}</span>
+            <Logo size={28} className="brand-logo" />
+            <span className="brand-name">{SITE.name}</span>
           </a>
         </header>
         <article className="licenses-body">
@@ -50,7 +50,7 @@ export default function Licenses() {
               ))}
             </tbody>
           </table>
-          <p><a href="/">Back to {SITE.short}</a></p>
+          <p><a href="/">Back to {SITE.name}</a></p>
         </article>
       </div>
     </main>

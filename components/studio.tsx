@@ -1,12 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Download, FolderOpen, Globe, ImagePlus, LoaderCircle, LockKeyhole, Shrink, Trash2, TriangleAlert, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Download, FolderOpen, Globe, ImagePlus, LoaderCircle, Trash2, TriangleAlert, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Compare } from "./compare";
 import { Counter } from "./counter";
 import { FrameMark } from "./frame-mark";
+import { Logo } from "./logo";
 import { Segmented } from "./segmented";
+import { ThemeToggle } from "./theme-toggle";
 import { filesFromDrop, saveBlob } from "../lib/drop.ts";
 import {
   MIME,
@@ -526,11 +528,9 @@ export function Studio() {
     <main className="app-shell">
       <div className="workspace">
         <header className="topbar">
-          <a className="brand" href={SITE.home} target="_blank" rel="noopener noreferrer" aria-label={`${SITE.homeLabel} website`}>
-            <span className="brand-icon" aria-hidden="true"><Shrink size={16} strokeWidth={1.8} /></span>
-            <span className="brand-name">{SITE.homeLabel}<span className="brand-period">.</span></span>
-            <span className="brand-divider" />
-            <span className="brand-description">{SITE.short}</span>
+          <a className="brand" href="/" aria-label={`${SITE.name}, start again`} onClick={(event) => { if (items.length) { event.preventDefault(); clearAll(); } }}>
+            <Logo size={28} className="brand-logo" />
+            <span className="brand-name">{SITE.name}</span>
           </a>
           <Segmented
             name="Where the pictures come from"
@@ -538,9 +538,12 @@ export function Studio() {
             value={mode}
             onChange={(value) => switchMode(value as Mode)}
           />
-          <div className="topbar-right" aria-live="polite">
-            <span className={`topbar-led ${pending > 0 ? "is-working" : ""}`} />
-            <span>{status}</span>
+          <div className="topbar-end">
+            <div className="topbar-right" aria-live="polite">
+              <span className={`topbar-led ${pending > 0 ? "is-working" : ""}`} />
+              <span>{status}</span>
+            </div>
+            <ThemeToggle />
           </div>
         </header>
 
@@ -856,17 +859,19 @@ export function Studio() {
         </AnimatePresence>
 
         <footer className="bottom-bar">
-          <div className="footer-left">
-            <LockKeyhole size={12} strokeWidth={1.7} aria-hidden="true" />
-            <span>{mode === "files" ? "NO UPLOADS" : "NOTHING KEPT"}</span>
-            <span className="footer-dot">&middot;</span>
-            <span>OPEN SOURCE</span>
+          <div className="footer-brand">
+            <Logo size={18} />
+            <span>
+              <b>{SITE.name}</b> By{" "}
+              <a href={SITE.home} target="_blank" rel="noopener noreferrer">{SITE.author}</a>
+            </span>
           </div>
-          <div className="footer-right">
-            <a className="footer-licenses" href={SITE.source} target="_blank" rel="noopener noreferrer">Source</a>
-            <a className="footer-licenses" href="/licenses/">Licenses</a>
-            <span className="footer-mark">B<span>.</span></span>
-          </div>
+          <nav className="footer-links" aria-label="About this app">
+            <a href={SITE.source} target="_blank" rel="noopener noreferrer">
+              GitHub <ArrowUpRight size={12} strokeWidth={1.8} aria-hidden="true" />
+            </a>
+            <a href="/licenses/">Licenses</a>
+          </nav>
         </footer>
       </div>
 
