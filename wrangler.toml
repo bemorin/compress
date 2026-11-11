@@ -1,0 +1,4 @@
+# Cloudflare Pages: the static export in out/ plus the Pages Functions in functions/.
+name = "compress"
+pages_build_output_dir = "out"
+compatibility_date = "2026-10-01"
