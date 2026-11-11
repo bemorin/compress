@@ -8,3 +8,4 @@ out/
 public/codecs/
 .wrangler/
 public/third-party-notices.txt
+.dev.vars

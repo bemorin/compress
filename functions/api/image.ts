@@ -1,7 +1,9 @@
 // GET /api/image?url=...: fetches one picture from another site for this page, because most sites
 // don't let other sites read their images. Only raster pictures come back (never SVG, which can
 // carry a script, nor HTML), at most 20 MB, with headers that keep the browser from running
-// anything in them. Nothing is stored.
+// anything in them. Nothing is stored. When IMAGE_LINK_SECRET is set, only addresses signed by a
+// recent /api/scan are fetched, so this relay can't be used for anything else.
+import { verifyLink } from "../../lib/server/sign.ts";
 import { checkAddress } from "../../lib/server/urls.ts";
 
 const MAX_BYTES = 20 * 1024 * 1024;
@@ -15,11 +17,16 @@ const SAFE = {
 const refuse = (message: string, status: number) =>
   new Response(message, { status, headers: { ...SAFE, "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
 
-export const onRequestGet = async ({ request }: { request: Request }) => {
+export const onRequestGet = async ({ request, env }: { request: Request; env: { IMAGE_LINK_SECRET?: string } }) => {
   const site = request.headers.get("Sec-Fetch-Site");
   if (site && site !== "same-origin") return refuse("This service only answers its own page.", 403);
 
-  const checked = checkAddress(new URL(request.url).searchParams.get("url") ?? "");
+  const params = new URL(request.url).searchParams;
+  const raw = params.get("url") ?? "";
+  if (env.IMAGE_LINK_SECRET && !(await verifyLink(env.IMAGE_LINK_SECRET, raw, params.get("t")))) {
+    return refuse("This link has expired or wasn't made by this page. Check the page again.", 403);
+  }
+  const checked = checkAddress(raw);
   if (!checked.ok) return refuse(checked.reason, 400);
 
   let upstream: Response;

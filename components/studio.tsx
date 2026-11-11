@@ -431,7 +431,7 @@ export function Studio() {
     if (!value || busyScanning) return;
     setNotice(null);
     setScan({ state: "reading", address: value });
-    let data: { page: string; images: { url: string }[]; truncated: boolean };
+    let data: { page: string; images: { url: string; token: string | null }[]; truncated: boolean };
     try {
       const response = await fetch("/api/scan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: value }) });
       if (response.status === 404 || response.status === 405) throw new Error("Reading pages needs this app's small server part, which isn't running here. Locally, use npm run pages:dev.");
@@ -455,7 +455,7 @@ export function Studio() {
     const fetchNext = async () => {
       for (let next = queue.shift(); next; next = queue.shift()) {
         try {
-          const response = await fetch(`/api/image?url=${encodeURIComponent(next.url)}`);
+          const response = await fetch(`/api/image?url=${encodeURIComponent(next.url)}${next.token ? `&t=${encodeURIComponent(next.token)}` : ""}`);
           if (!response.ok) throw new Error(String(response.status));
           const blob = await response.blob();
           await ingest([new File([blob], nameFromUrl(next.url, next.index), { type: blob.type, lastModified: 0 })], "page", [next.url]);

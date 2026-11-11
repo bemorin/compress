@@ -34,7 +34,7 @@ This needs a server, because most sites don't let another site read their pictur
 - `functions/api/scan.ts` (`POST /api/scan`) reads the page's HTML once (15-second limit, first 3 MB) and lists up to 80 pictures: `img` (`src`, `srcset`, common lazy-loading attributes), `picture` sources, `og:image`, preloaded images, inline `background-image` and video posters. SVG and icons are skipped.
 - `functions/api/image.ts` (`GET /api/image?url=`) fetches one picture (20-second limit, 20 MB) and passes it on with headers that keep the browser from running anything in it. Only JPEG, PNG, WebP, AVIF, GIF and BMP come back.
 
-Both refuse private and local addresses (`localhost`, `10.x`, `192.168.x`, `169.254.x`, IPv6 local ranges and so on), addresses with a user name or password, and non-standard ports. Both answer only their own page. Nothing is stored. Pictures that a page adds later with JavaScript can't be seen this way.
+`/api/image` only fetches addresses that `/api/scan` signed in the last 15 minutes (see `IMAGE_LINK_SECRET` below). Both refuse private and local addresses (`localhost`, `10.x`, `192.168.x`, `169.254.x`, IPv6 local ranges and so on), addresses with a user name or password, and non-standard ports. Both answer only their own page. Nothing is stored. Pictures that a page adds later with JavaScript can't be seen this way.
 
 The compression itself still happens in the browser.
 
@@ -74,7 +74,9 @@ Connect the repository to a Cloudflare Pages project with these settings:
 
 Cloudflare picks up the `functions/` folder on its own and deploys it with the site. `public/_headers` sets a strict Content Security Policy (scripts, workers and WebAssembly from the site only) and long caching for the hashed files. The largest file is the AVIF encoder, about 3.5 MB, well under the 25 MiB Pages limit.
 
-To put a ceiling on the web-page mode, add a rate-limiting rule for `/api/*` in the Cloudflare dashboard (Security, WAF, Rate limiting rules).
+**Set a secret for the image relay.** In the Pages project, open Settings, Variables and Secrets, and add `IMAGE_LINK_SECRET` as a Secret, with a long random value (in PowerShell: `[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))`). Then deploy again. With it, `/api/scan` signs every picture address it finds, valid for 15 minutes, and `/api/image` refuses any address without a valid signature, so nobody can use the relay for anything else. Without it, the relay accepts any public address. For local runs, put the same line in a `.dev.vars` file (kept out of git).
+
+To put a ceiling on page scans, add a rate-limiting rule for `/api/scan` in the Cloudflare dashboard (Security, WAF, Rate limiting rules). Leave `/api/image` out of it: one scan asks for up to 80 pictures in a few seconds.
 
 ## Your own copy
 

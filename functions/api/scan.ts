@@ -1,5 +1,8 @@
 // POST /api/scan {"url": "..."}: lists the pictures a page shows, from its HTML.
 // The page is read once, with a time limit and at most 3 MB of it. Nothing is stored.
+// Each picture comes with a short-lived signed token, the only way /api/image will fetch it
+// (when the IMAGE_LINK_SECRET variable is set, which it should be in production).
+import { signLink } from "../../lib/server/sign.ts";
 import { checkAddress, cssUrls, resolveImage, srcsetCandidates } from "../../lib/server/urls.ts";
 
 const MAX_HTML = 3 * 1024 * 1024;
@@ -39,7 +42,7 @@ async function readCapped(response: Response, limit: number) {
   return new TextDecoder().decode(bytes);
 }
 
-export const onRequestPost = async ({ request }: { request: Request }) => {
+export const onRequestPost = async ({ request, env }: { request: Request; env: { IMAGE_LINK_SECRET?: string } }) => {
   const origin = request.headers.get("Origin");
   if (origin && origin !== new URL(request.url).origin) return json({ error: "This service only answers its own page." }, 403);
 
@@ -122,9 +125,9 @@ export const onRequestPost = async ({ request }: { request: Request }) => {
 
   await rewriter.transform(new Response(html, { headers: { "Content-Type": "text/html" } })).arrayBuffer();
 
-  return json({
-    page: finalUrl.url.toString(),
-    images: [...found].map(([url, source]) => ({ url, source })),
-    truncated: found.size >= MAX_IMAGES,
-  });
+  const secret = env.IMAGE_LINK_SECRET;
+  const images = await Promise.all(
+    [...found].map(async ([url, source]) => ({ url, source, token: secret ? await signLink(secret, url) : null })),
+  );
+  return json({ page: finalUrl.url.toString(), images, truncated: found.size >= MAX_IMAGES });
 };
