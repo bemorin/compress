@@ -774,9 +774,15 @@ strong.summary-value { color: var(--ink); font-weight: 600; }
     -webkit-backdrop-filter: blur(12px);
   }
 }
+/* Three items stay on one row: the name, the mode switch and the theme switch (the status hides). */
 @media (max-width: 720px) {
-  .topbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .topbar { grid-template-columns: minmax(0, 1fr) auto auto; }
   .topbar-right { display: none; }
+  .brand-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+/* On a touch screen, keyboard shortcuts, pasting and dropping mean nothing: only the buttons remain. */
+@media (hover: none) and (pointer: coarse) {
+  .button-shortcut, .paste-copy, .drag-caption { display: none; }
 }
 @media (max-width: 640px) {
   .app-shell { padding: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
